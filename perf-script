@@ -345,7 +345,8 @@ test_run = rpc_client.TestRun.create({
 
 for case in test_cases:
     test_case_run = rpc_client.TestRun.add_case(test_run['run_id'], case['case_id'])
-
-    rpc_client.TestCaseRun.update(test_case_run['case_run_id'], {
-        'case_run_status': 4, # PASS
+    
+    rpc_client.TestExecution.update(test_case_run['case_run_id'], {
+        'status': 4, # PASS
     })
+
