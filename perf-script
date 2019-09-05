@@ -297,7 +297,8 @@ test_parse_bool_value_with_rejected_args (tcms.xmlrpc.tests.test_utils.TestParse
 """.strip().split('\n')[:250]
 
 
-# ID values at demo.kiwitcms.org
+# ID values at public.tenant.kiwitcms.org
+MANAGER = 'your-username-here'
 PRODUCT_ID = 31       # Kiwi TCMS
 PRODUCT_VERSION = 721 # 6.1-ee
 CATEGORY_ID = 46      # --default--
@@ -338,14 +339,14 @@ build = rpc_client.Build.create({
 
 test_run = rpc_client.TestRun.create({
     'summary': 'Performance baseline at %s' % NOW,
-    'manager': 'atodorov',
+    'manager': MANAGER,
     'plan': test_plan['plan_id'],
     'build': build['build_id'],
 })
 
 for case in test_cases:
     test_case_run = rpc_client.TestRun.add_case(test_run['run_id'], case['case_id'])
-    
+
     rpc_client.TestExecution.update(test_case_run['case_run_id'], {
         'status': 4, # PASS
     })
