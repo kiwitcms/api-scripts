@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+
+"""
+    Copy of `perf-script-ng`, 13017d, which calls KiwiTCMS.version()
+    API and doesn't create any objects in the DB. This script together
+    with `perf-script-orm` will help us get an idea how much time execution
+    spends inside the web stack compared to read/write from DB.
+    
+    NOTE: The KiwiTCMS.version() API returns a static string!
+
+    Sample size: R
+    Number of API requests: 10 + 3R + 2R^2
+"""
+
+
+import ssl
+
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    # Legacy Python that doesn't verify HTTPS certificates by default
+    pass
+else:
+    # Handle target environment that doesn't support HTTPS verification
+    ssl._create_default_https_context = _create_unverified_https_context
+
+
+import tcms_api
+from datetime import datetime
+
+RANGE_SIZE = 30
+
+rpc_client = tcms_api.TCMS().exec
+
+user = rpc_client.KiwiTCMS.version()
+classification = rpc_client.KiwiTCMS.version()
+
+
+# create a separate Product, Version & TestCase
+product = rpc_client.KiwiTCMS.version()
+version = rpc_client.KiwiTCMS.version()
+
+# create TestPlan
+test_plan = rpc_client.KiwiTCMS.version()
+
+test_cases = []
+priority = rpc_client.KiwiTCMS.version()
+category = rpc_client.KiwiTCMS.version()
+confirmed_status = rpc_client.KiwiTCMS.version()
+
+for j in range(RANGE_SIZE):
+    test_case = rpc_client.KiwiTCMS.version()
+    test_cases.append(test_case)
+    # simulates TestPlan.add_case()
+    rpc_client.KiwiTCMS.version()
+
+
+# create build, test run & test executions
+pass_status = rpc_client.KiwiTCMS.version()
+build = rpc_client.KiwiTCMS.version()
+
+# create a separate TestPlan
+for i in range(RANGE_SIZE):
+    test_run = rpc_client.KiwiTCMS.version()
+    print("TR-%d created" % i)
+
+    # add cases to TR
+    for case in test_cases:
+        execution = rpc_client.KiwiTCMS.version()
+
+        # record the results
+        rpc_client.KiwiTCMS.version()
+
