@@ -1,0 +1,102 @@
+"""
+    A copy of perf-script-ng, 13017d1, which performs the same
+    operations via the ORM layer. Useful for comparing the execution
+    time between API/web vs. the ORM/DB layer.
+
+    Execute as:
+
+    cat ./perf-script-orm | docker exec -i kiwi_web /Kiwi/manage.py shell
+
+    Sample size: R
+    Number of test results: R^2
+    Number of API requests: 10 + 3R + 2R^2
+"""
+
+from datetime import datetime
+
+from django.contrib.auth.models import User
+
+from tcms.management.models import *
+from tcms.testcases.models import *
+from tcms.testplans.models import *
+from tcms.testruns.models import *
+
+RANGE_SIZE = 30
+
+user = User.objects.first()
+
+
+# WARNING: target server needs to have 1 classification created
+classification = Classification.objects.first()
+
+
+# create a separate Product, Version & TestCase
+product = Product.objects.create(
+    name='Product created at %s' % datetime.now().isoformat(),
+    classification=classification,
+)
+
+version = Version.objects.create(
+    product=product,
+    value='ver-%s' % datetime.now().isoformat(),
+)
+
+# create TestPlan
+test_plan = TestPlan.objects.create(
+    name='TP: created at %s' % datetime.now().isoformat(),
+    text='A script is creating this TP and adds TCs and TRs to it to establish a performance baseline',
+    type_id=7, # Performance
+    product=product,
+    product_version=version,
+    is_active=True,
+    author=user,
+)
+
+test_cases = []
+priority = Priority.objects.first()
+category = Category.objects.filter(
+    product=product,
+).first()
+confirmed_status = TestCaseStatus.objects.filter(is_confirmed=True).first()
+
+for j in range(RANGE_SIZE):
+    test_case = TestCase.objects.create(
+        summary='Case created at %s' % datetime.now().isoformat(),
+        category=category,
+        priority=priority,
+        case_status=confirmed_status,
+        author=user,
+    )
+
+    test_cases.append(test_case)
+    test_plan.add_case(test_case)
+
+
+# create build, test run & test executions
+pass_status = TestExecutionStatus.objects.filter(weight__gt=0).first()
+build = Build.objects.create(
+    name='b.%s' % datetime.now().isoformat(),
+    version=version,
+)
+
+
+# create a separate TestPlan
+for i in range(RANGE_SIZE):
+    test_run = TestRun.objects.create(
+        summary='TR %d %s' % (i, datetime.now().isoformat()),
+        manager=user,
+        plan=test_plan,
+        build=build,
+    )
+    print("TR-%d created" % test_run.pk)
+
+    # add cases to TR
+    sortkey = 10
+    for case in test_cases:
+        execution = test_run.create_execution(case=case, sortkey=sortkey)
+        sortkey += 10
+
+        # record the results
+        execution.status = pass_status
+        execution.save()
+
