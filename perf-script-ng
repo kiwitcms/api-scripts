@@ -99,9 +99,12 @@ for i in range(RANGE_SIZE):
 
     # add cases to TR
     for case in test_cases:
-        execution = rpc_client.TestRun.add_case(test_run['id'], case['id'])
+        result = rpc_client.TestRun.add_case(test_run['id'], case['id'])
+        if not isinstance(result, list):
+            result = [result]
 
         # record the results
-        rpc_client.TestExecution.update(execution['id'], {
-            'status': pass_status['id'],
-        })
+        for execution in result:
+            rpc_client.TestExecution.update(execution['id'], {
+                'status': pass_status['id'],
+            })
