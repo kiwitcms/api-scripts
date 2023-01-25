@@ -93,10 +93,10 @@ for i in range(RANGE_SIZE):
     # add cases to TR
     sortkey = 10
     for case in test_cases:
-        execution = test_run.create_execution(case=case, sortkey=sortkey)
+        executions = test_run.create_execution(case=case, sortkey=sortkey)
         sortkey += 10
 
         # record the results
-        execution.status = pass_status
-        execution.save()
-
+        for execution in executions:
+            execution.status = pass_status
+            execution.save()
